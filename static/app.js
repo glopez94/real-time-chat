@@ -20,8 +20,8 @@ function register() {
                 alert('Registration successful! You can now login.');
                 window.location.href = '/login';
             }
-        })
-};
+        });
+}
 
 function login() {
     const username = document.getElementById('username').value;
@@ -88,12 +88,13 @@ function connectWebSocket(username) {
 
     ws.onmessage = function (event) {
         const msg = JSON.parse(event.data);
-        if (msg.username === chatWith || msg.username === username) {
-            const messages = document.getElementById('messages');
-            messages.innerHTML += `<div><strong>${msg.username}:</strong> ${msg.message}</div>`;
-            messages.scrollTop = messages.scrollHeight;
-        } else if (msg.message.includes('is now')) {
+        if (msg.message.includes('is now')) {
             loadUsers();
+        } else if (msg.username === chatWith || msg.username === username) {
+            const messages = document.getElementById('messages');
+            const messageClass = msg.username === username ? 'sent' : 'received';
+            messages.innerHTML += `<div class="message ${messageClass}"><strong>${msg.username}:</strong> ${msg.message}</div>`;
+            messages.scrollTop = messages.scrollHeight;
         }
     };
 
@@ -119,6 +120,8 @@ window.onload = function () {
     const path = window.location.pathname;
     if (path === '/users_page') {
         loadUsers();
+        const username = getCookie('username');
+        connectWebSocket(username);
     } else if (path === '/chat') {
         const urlParams = new URLSearchParams(window.location.search);
         chatWith = urlParams.get('user');

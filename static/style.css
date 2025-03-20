@@ -38,3 +38,20 @@ button {
     margin-bottom: 10px;
     padding: 10px;
 }
+
+.message {
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message.sent {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+}
+
+.message.received {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    align-self: flex-start;
+}
