@@ -133,9 +133,9 @@ window.onload = function () {
         fetch(`/api/chat?user=${chatWith}`)
             .then(response => response.json())
             .then(chat => {
-                chatID = chat.ID;
+                chatID = chat.chat.ID;
                 const messages = document.getElementById('messages');
-                chat.Messages.forEach(msg => {
+                chat.chat.Messages.forEach(msg => {
                     const messageClass = msg.username === username ? 'sent' : 'received';
                     messages.innerHTML += `<div class="message ${messageClass}"><strong>${msg.username}:</strong> ${msg.message}</div>`;
                 });

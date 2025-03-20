@@ -71,7 +71,7 @@ func getChat(c *gin.Context) {
 	}
 
 	db.Preload("Messages").Find(&chat)
-	c.JSON(200, chat)
+	c.JSON(200, gin.H{"chat": chat})
 }
 
 func sendMessage(c *gin.Context) {

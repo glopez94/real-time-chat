@@ -14,7 +14,7 @@ func initDatabase() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&User{}, &Message{}, &Chat{})
 }
 
 func authMiddleware() gin.HandlerFunc {
@@ -49,6 +49,8 @@ func main() {
 	r.POST("/login", login)
 	r.GET("/logout", logout)
 	r.GET("/api/users", authMiddleware(), getUsers)
+	r.GET("/api/chat", authMiddleware(), getChat)
+	r.POST("/api/send", authMiddleware(), sendMessage)
 	r.GET("/ws", authMiddleware(), handleConnections)
 
 	r.Static("/static", "./static")
