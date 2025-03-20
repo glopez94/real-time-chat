@@ -10,10 +10,13 @@ func register(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	if err := db.Create(&user).Error; err != nil {
+	var existingUser User
+	db.Where("username = ?", user.Username).First(&existingUser)
+	if existingUser.ID != 0 {
 		c.JSON(400, gin.H{"error": "Username already exists"})
 		return
 	}
+	db.Create(&user)
 	c.JSON(200, user)
 }
 

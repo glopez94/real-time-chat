@@ -1,4 +1,5 @@
 let ws;
+let chatWith = '';
 
 function register() {
     const username = document.getElementById('reg-username').value;
@@ -38,32 +39,9 @@ function login() {
             if (data.error) {
                 alert(data.error);
             } else {
-                window.location.href = '/chat';
-                connectWebSocket(username);
+                window.location.href = '/users_page';
             }
         });
-}
-
-function connectWebSocket(username) {
-    ws = new WebSocket(`ws://${window.location.host}/ws`);
-
-    ws.onmessage = function (event) {
-        const msg = JSON.parse(event.data);
-        const messages = document.getElementById('messages');
-        messages.innerHTML += `<div><strong>${msg.username}:</strong> ${msg.message}</div>`;
-        messages.scrollTop = messages.scrollHeight;
-    };
-
-    ws.onopen = function () {
-        ws.send(JSON.stringify({ username, message: 'has joined the chat' }));
-    };
-}
-
-function sendMessage() {
-    const message = document.getElementById('message').value;
-    const username = document.getElementById('username').value;
-    ws.send(JSON.stringify({ username, message }));
-    document.getElementById('message').value = '';
 }
 
 function loadUsers() {
@@ -71,9 +49,9 @@ function loadUsers() {
         .then(response => response.json())
         .then(users => {
             const usersDiv = document.getElementById('users');
-            usersDiv.innerHTML = '<h3>Online Users</h3>';
+            usersDiv.innerHTML = '<h3>Users</h3>';
             users.forEach(user => {
-                usersDiv.innerHTML += `<div>${user.username} (${user.online ? 'Online' : 'Offline'})</div>`;
+                usersDiv.innerHTML += `<div onclick="startChat('${user.username}')">${user.username} (${user.online ? 'Online' : 'Offline'})</div>`;
             });
         });
 }
@@ -91,3 +69,43 @@ function searchUsers() {
         }
     }
 }
+
+function startChat(username) {
+    chatWith = username;
+    window.location.href = '/chat';
+}
+
+function connectWebSocket(username) {
+    ws = new WebSocket(`ws://${window.location.host}/ws`);
+
+    ws.onmessage = function (event) {
+        const msg = JSON.parse(event.data);
+        if (msg.username === chatWith || msg.username === username) {
+            const messages = document.getElementById('messages');
+            messages.innerHTML += `<div><strong>${msg.username}:</strong> ${msg.message}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }
+    };
+
+    ws.onopen = function () {
+        ws.send(JSON.stringify({ username, message: `has joined the chat with ${chatWith}` }));
+    };
+}
+
+function sendMessage() {
+    const message = document.getElementById('message').value;
+    const username = document.getElementById('username').value;
+    ws.send(JSON.stringify({ username, message }));
+    document.getElementById('message').value = '';
+}
+
+window.onload = function () {
+    const path = window.location.pathname;
+    if (path === '/users_page') {
+        loadUsers();
+    } else if (path === '/chat') {
+        const username = document.getElementById('username').value;
+        document.getElementById('chat-with').textContent = chatWith;
+        connectWebSocket(username);
+    }
+};
