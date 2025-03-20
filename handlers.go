@@ -35,7 +35,19 @@ func login(c *gin.Context) {
 	dbUser.Online = true
 	db.Save(&dbUser)
 	c.SetCookie("username", dbUser.Username, 3600, "/", "", false, true)
+	broadcast <- Message{Username: dbUser.Username, Message: "is now online"}
 	c.JSON(200, dbUser)
+}
+
+func logout(c *gin.Context) {
+	username, _ := c.Cookie("username")
+	var user User
+	db.Where("username = ?", username).First(&user)
+	user.Online = false
+	db.Save(&user)
+	c.SetCookie("username", "", -1, "/", "", false, true)
+	broadcast <- Message{Username: user.Username, Message: "is now offline"}
+	c.Redirect(302, "/login")
 }
 
 func getUsers(c *gin.Context) {

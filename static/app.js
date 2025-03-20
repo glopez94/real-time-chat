@@ -20,8 +20,8 @@ function register() {
                 alert('Registration successful! You can now login.');
                 window.location.href = '/login';
             }
-        });
-}
+        })
+};
 
 function login() {
     const username = document.getElementById('username').value;
@@ -41,8 +41,14 @@ function login() {
             } else {
                 document.cookie = `username=${username}; path=/`;
                 window.location.href = '/users_page';
-                loadUsers();
             }
+        });
+}
+
+function logout() {
+    fetch('/logout')
+        .then(() => {
+            window.location.href = '/login';
         });
 }
 
@@ -86,6 +92,8 @@ function connectWebSocket(username) {
             const messages = document.getElementById('messages');
             messages.innerHTML += `<div><strong>${msg.username}:</strong> ${msg.message}</div>`;
             messages.scrollTop = messages.scrollHeight;
+        } else if (msg.message.includes('is now')) {
+            loadUsers();
         }
     };
 

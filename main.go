@@ -29,24 +29,37 @@ func authMiddleware() gin.HandlerFunc {
 	}
 }
 
+func sessionMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username, err := c.Cookie("username")
+		if err == nil && username != "" {
+			c.Redirect(302, "/users_page")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
 func main() {
 	r := gin.Default()
 	initDatabase()
 
 	r.POST("/register", register)
 	r.POST("/login", login)
+	r.GET("/logout", logout)
 	r.GET("/api/users", authMiddleware(), getUsers)
 	r.GET("/ws", authMiddleware(), handleConnections)
 
 	r.Static("/static", "./static")
 	r.LoadHTMLFiles("static/index.html", "static/register.html", "static/login.html", "static/users.html", "static/chat.html")
-	r.GET("/", func(c *gin.Context) {
+	r.GET("/", sessionMiddleware(), func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
 	})
-	r.GET("/register", func(c *gin.Context) {
+	r.GET("/register", sessionMiddleware(), func(c *gin.Context) {
 		c.HTML(200, "register.html", nil)
 	})
-	r.GET("/login", func(c *gin.Context) {
+	r.GET("/login", sessionMiddleware(), func(c *gin.Context) {
 		c.HTML(200, "login.html", nil)
 	})
 	r.GET("/users_page", authMiddleware(), func(c *gin.Context) {
