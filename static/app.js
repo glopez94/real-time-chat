@@ -1,5 +1,27 @@
 let ws;
 
+function register() {
+    const username = document.getElementById('reg-username').value;
+    const password = document.getElementById('reg-password').value;
+
+    fetch('/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert('Registration successful! You can now login.');
+                window.location.href = '/';
+            }
+        });
+}
+
 function login() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -47,7 +69,7 @@ function sendMessage() {
 }
 
 function loadUsers() {
-    fetch('/users')
+    fetch('/api/users')
         .then(response => response.json())
         .then(users => {
             const usersDiv = document.getElementById('users');

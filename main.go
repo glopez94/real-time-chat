@@ -23,13 +23,19 @@ func main() {
 
 	r.POST("/register", register)
 	r.POST("/login", login)
-	r.GET("/users", getUsers)
+	r.GET("/api/users", getUsers)
 	r.GET("/ws", handleConnections)
 
 	r.Static("/static", "./static")
-	r.LoadHTMLFiles("static/index.html")
+	r.LoadHTMLFiles("static/index.html", "static/register.html", "static/users.html")
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
+	})
+	r.GET("/register", func(c *gin.Context) {
+		c.HTML(200, "register.html", nil)
+	})
+	r.GET("/users_page", func(c *gin.Context) {
+		c.HTML(200, "users.html", nil)
 	})
 
 	go handleMessages()
