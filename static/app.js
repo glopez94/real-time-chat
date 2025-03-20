@@ -58,7 +58,7 @@ function loadUsers() {
         .then(response => response.json())
         .then(users => {
             const usersDiv = document.getElementById('users');
-            usersDiv.innerHTML = '<h3>Users</h3>';
+            usersDiv.innerHTML = '<h3>Usuarios en línea</h3>';
             users.forEach(user => {
                 usersDiv.innerHTML += `<div onclick="startChat('${user.username}')">${user.username} (${user.online ? 'Online' : 'Offline'})</div>`;
             });
@@ -89,18 +89,23 @@ function connectWebSocket(username) {
 
     ws.onmessage = function (event) {
         const msg = JSON.parse(event.data);
-        if (msg.message.includes('is now')) {
-            loadUsers();
-        } else if (msg.username === username || msg.recipient === username) {
-            const messages = document.getElementById('messages');
-            const messageClass = msg.username === username ? 'sent' : 'received';
+
+        if (msg.type === "users_update") {
+            updateUsersList(msg.users);
+        } else {
+            const messages = document.getElementById("messages");
+            const messageClass = msg.username === username ? "sent" : "received";
             messages.innerHTML += `<div class="message ${messageClass}"><strong>${msg.username}:</strong> ${msg.message}</div>`;
             messages.scrollTop = messages.scrollHeight;
         }
     };
 
     ws.onopen = function () {
-        ws.send(JSON.stringify({ username, recipient: chatWith, message: `has joined the chat with ${chatWith}` }));
+        ws.send(JSON.stringify({ username, recipient: chatWith, message: `${username} has joined the chat with ${chatWith}.` }));
+    };
+
+    ws.onclose = function () {
+        ws.send(JSON.stringify({ username, recipient: chatWith, message: `${username} has left the chat with ${chatWith}.` }));
     };
 }
 
@@ -115,6 +120,16 @@ function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function updateUsersList(users) {
+    const usersDiv = document.getElementById("users");
+    usersDiv.innerHTML = "<h3>Usuarios en línea</h3>";
+
+    users.forEach((user) => {
+        // usersDiv.innerHTML += `<div onclick="startChat('${user}')">${user} (Online)</div>`;
+        usersDiv.innerHTML += `<div onclick="startChat('${user.username}')">${user.username} (${user.online ? 'Online' : 'Offline'})</div>`;
+    });
 }
 
 window.onload = function () {

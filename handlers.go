@@ -26,16 +26,22 @@ func login(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+
 	var dbUser User
 	db.Where("username = ? AND password = ?", user.Username, user.Password).First(&dbUser)
 	if dbUser.ID == 0 {
 		c.JSON(401, gin.H{"error": "Invalid credentials"})
 		return
 	}
-	dbUser.Online = true
-	db.Save(&dbUser)
+
+	// Marcar usuario como online
+	db.Model(&dbUser).Update("Online", true)
+
 	c.SetCookie("username", dbUser.Username, 3600, "/", "", false, true)
-	broadcast <- Message{Username: dbUser.Username, Message: "is now online"}
+
+	// Notificar a todos los clientes WebSocket que la lista de usuarios cambió
+	broadcastUsers()
+
 	c.JSON(200, dbUser)
 }
 
@@ -43,16 +49,22 @@ func logout(c *gin.Context) {
 	username, _ := c.Cookie("username")
 	var user User
 	db.Where("username = ?", username).First(&user)
-	user.Online = false
-	db.Save(&user)
+
+	// Marcar usuario como offline
+	db.Model(&user).Update("Online", false)
+
 	c.SetCookie("username", "", -1, "/", "", false, true)
-	broadcast <- Message{Username: user.Username, Message: "is now offline"}
+
+	// Notificar a todos los clientes WebSocket que la lista de usuarios cambió
+	broadcastUsers()
+
 	c.Redirect(302, "/login")
 }
 
 func getUsers(c *gin.Context) {
 	var users []User
 	db.Find(&users)
+	// db.Where("online = ?", true).Find(&users) // Solo los usuarios en línea
 	c.JSON(200, users)
 }
 
