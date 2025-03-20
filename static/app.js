@@ -17,7 +17,7 @@ function register() {
                 alert(data.error);
             } else {
                 alert('Registration successful! You can now login.');
-                window.location.href = '/';
+                window.location.href = '/login';
             }
         });
 }
@@ -38,10 +38,8 @@ function login() {
             if (data.error) {
                 alert(data.error);
             } else {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('chat').style.display = 'block';
+                window.location.href = '/chat';
                 connectWebSocket(username);
-                loadUsers();
             }
         });
 }
@@ -75,7 +73,21 @@ function loadUsers() {
             const usersDiv = document.getElementById('users');
             usersDiv.innerHTML = '<h3>Online Users</h3>';
             users.forEach(user => {
-                usersDiv.innerHTML += `<div>${user.username}</div>`;
+                usersDiv.innerHTML += `<div>${user.username} (${user.online ? 'Online' : 'Offline'})</div>`;
             });
         });
+}
+
+function searchUsers() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const usersDiv = document.getElementById('users');
+    const users = usersDiv.getElementsByTagName('div');
+    for (let i = 0; i < users.length; i++) {
+        const username = users[i].textContent.toLowerCase();
+        if (username.includes(search)) {
+            users[i].style.display = '';
+        } else {
+            users[i].style.display = 'none';
+        }
+    }
 }

@@ -10,7 +10,10 @@ func register(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	db.Create(&user)
+	if err := db.Create(&user).Error; err != nil {
+		c.JSON(400, gin.H{"error": "Username already exists"})
+		return
+	}
 	c.JSON(200, user)
 }
 
@@ -33,6 +36,6 @@ func login(c *gin.Context) {
 
 func getUsers(c *gin.Context) {
 	var users []User
-	db.Where("online = ?", true).Find(&users)
+	db.Find(&users)
 	c.JSON(200, users)
 }

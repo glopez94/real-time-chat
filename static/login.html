@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users</title>
+    <title>Login</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
     <div id="app">
-        <h2>Online Users</h2>
-        <input type="text" id="search" placeholder="Search users" oninput="searchUsers()">
-        <div id="users"></div>
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
     </div>
     <script src="/static/app.js"></script>
 </body>

@@ -17,7 +17,9 @@ body {
 }
 
 #login,
-#chat {
+#register,
+#chat,
+#users {
     display: flex;
     flex-direction: column;
 }

@@ -27,15 +27,21 @@ func main() {
 	r.GET("/ws", handleConnections)
 
 	r.Static("/static", "./static")
-	r.LoadHTMLFiles("static/index.html", "static/register.html", "static/users.html")
+	r.LoadHTMLFiles("static/index.html", "static/register.html", "static/login.html", "static/users.html", "static/chat.html")
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
 	})
 	r.GET("/register", func(c *gin.Context) {
 		c.HTML(200, "register.html", nil)
 	})
+	r.GET("/login", func(c *gin.Context) {
+		c.HTML(200, "login.html", nil)
+	})
 	r.GET("/users_page", func(c *gin.Context) {
 		c.HTML(200, "users.html", nil)
+	})
+	r.GET("/chat", func(c *gin.Context) {
+		c.HTML(200, "chat.html", nil)
 	})
 
 	go handleMessages()

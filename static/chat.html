@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Chat</title>
+    <title>Chat</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
     <div id="app">
-        <h1>Welcome to Real-Time Chat</h1>
-        <a href="/register">Register</a>
-        <a href="/login">Login</a>
-        <a href="/users_page">Users</a>
-        <a href="/chat">Chat</a>
+        <h2>Chat</h2>
+        <div id="messages"></div>
+        <input type="text" id="message" placeholder="Type a message">
+        <button onclick="sendMessage()">Send</button>
     </div>
+    <script src="/static/app.js"></script>
 </body>
 
 </html>
