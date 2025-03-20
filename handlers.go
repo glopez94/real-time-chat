@@ -55,3 +55,36 @@ func getUsers(c *gin.Context) {
 	db.Find(&users)
 	c.JSON(200, users)
 }
+
+func getChat(c *gin.Context) {
+	username, _ := c.Cookie("username")
+	recipient := c.Query("user")
+	var user1, user2 User
+	db.Where("username = ?", username).First(&user1)
+	db.Where("username = ?", recipient).First(&user2)
+
+	var chat Chat
+	db.Where("(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)", user1.ID, user2.ID, user2.ID, user1.ID).First(&chat)
+	if chat.ID == 0 {
+		chat = Chat{User1ID: user1.ID, User2ID: user2.ID}
+		db.Create(&chat)
+	}
+
+	db.Preload("Messages").Find(&chat)
+	c.JSON(200, chat)
+}
+
+func sendMessage(c *gin.Context) {
+	var msg Message
+	if err := c.ShouldBindJSON(&msg); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	var chat Chat
+	db.Where("id = ?", msg.ChatID).First(&chat)
+	db.Create(&msg)
+	chat.Messages = append(chat.Messages, msg)
+	db.Save(&chat)
+	broadcast <- msg
+	c.JSON(200, msg)
+}

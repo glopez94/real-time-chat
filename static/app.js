@@ -1,5 +1,6 @@
 let ws;
 let chatWith = '';
+let chatID = '';
 
 function register() {
     const username = document.getElementById('reg-username').value;
@@ -90,7 +91,7 @@ function connectWebSocket(username) {
         const msg = JSON.parse(event.data);
         if (msg.message.includes('is now')) {
             loadUsers();
-        } else if (msg.username === chatWith || msg.username === username) {
+        } else if (msg.username === username || msg.recipient === username) {
             const messages = document.getElementById('messages');
             const messageClass = msg.username === username ? 'sent' : 'received';
             messages.innerHTML += `<div class="message ${messageClass}"><strong>${msg.username}:</strong> ${msg.message}</div>`;
@@ -99,14 +100,14 @@ function connectWebSocket(username) {
     };
 
     ws.onopen = function () {
-        ws.send(JSON.stringify({ username, message: `has joined the chat with ${chatWith}` }));
+        ws.send(JSON.stringify({ username, recipient: chatWith, message: `has joined the chat with ${chatWith}` }));
     };
 }
 
 function sendMessage() {
     const message = document.getElementById('message').value;
     const username = getCookie('username');
-    ws.send(JSON.stringify({ username, message }));
+    ws.send(JSON.stringify({ username, recipient: chatWith, message, chat_id: chatID }));
     document.getElementById('message').value = '';
 }
 
@@ -128,5 +129,17 @@ window.onload = function () {
         document.getElementById('chat-with').textContent = chatWith;
         const username = getCookie('username');
         connectWebSocket(username);
+
+        fetch(`/api/chat?user=${chatWith}`)
+            .then(response => response.json())
+            .then(chat => {
+                chatID = chat.ID;
+                const messages = document.getElementById('messages');
+                chat.Messages.forEach(msg => {
+                    const messageClass = msg.username === username ? 'sent' : 'received';
+                    messages.innerHTML += `<div class="message ${messageClass}"><strong>${msg.username}:</strong> ${msg.message}</div>`;
+                });
+                messages.scrollTop = messages.scrollHeight;
+            });
     }
 };

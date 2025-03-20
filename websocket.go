@@ -13,7 +13,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var clients = make(map[*websocket.Conn]bool)
+var clients = make(map[*websocket.Conn]string)
 var broadcast = make(chan Message)
 
 func handleConnections(c *gin.Context) {
@@ -23,7 +23,8 @@ func handleConnections(c *gin.Context) {
 		return
 	}
 	defer ws.Close()
-	clients[ws] = true
+	username, _ := c.Cookie("username")
+	clients[ws] = username
 
 	for {
 		var msg Message
@@ -39,11 +40,13 @@ func handleConnections(c *gin.Context) {
 func handleMessages() {
 	for {
 		msg := <-broadcast
-		for client := range clients {
-			err := client.WriteJSON(msg)
-			if err != nil {
-				client.Close()
-				delete(clients, client)
+		for client, username := range clients {
+			if username == msg.Username || username == msg.Recipient {
+				err := client.WriteJSON(msg)
+				if err != nil {
+					client.Close()
+					delete(clients, client)
+				}
 			}
 		}
 	}
