@@ -101,7 +101,7 @@ function connectWebSocket(username) {
     };
 
     ws.onopen = function () {
-        ws.send(JSON.stringify({ username, recipient: chatWith, message: `${username} has joined the chat with ${chatWith}.` }));
+        ws.send(JSON.stringify({ username, recipient: self.chatWith, message: `${username} has joined the chat with ${chatWith}.` }));
     };
 
     ws.onclose = function () {
