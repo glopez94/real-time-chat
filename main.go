@@ -26,6 +26,12 @@ func main() {
 	r.GET("/users", getUsers)
 	r.GET("/ws", handleConnections)
 
+	r.Static("/static", "./static")
+	r.LoadHTMLFiles("static/index.html")
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(200, "index.html", nil)
+	})
+
 	go handleMessages()
 
 	r.Run(":8080")
