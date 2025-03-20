@@ -39,7 +39,9 @@ function login() {
             if (data.error) {
                 alert(data.error);
             } else {
+                document.cookie = `username=${username}; path=/`;
                 window.location.href = '/users_page';
+                loadUsers();
             }
         });
 }
@@ -72,7 +74,7 @@ function searchUsers() {
 
 function startChat(username) {
     chatWith = username;
-    window.location.href = '/chat';
+    window.location.href = `/chat?user=${username}`;
 }
 
 function connectWebSocket(username) {
@@ -94,9 +96,15 @@ function connectWebSocket(username) {
 
 function sendMessage() {
     const message = document.getElementById('message').value;
-    const username = document.getElementById('username').value;
+    const username = getCookie('username');
     ws.send(JSON.stringify({ username, message }));
     document.getElementById('message').value = '';
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
 window.onload = function () {
@@ -104,8 +112,10 @@ window.onload = function () {
     if (path === '/users_page') {
         loadUsers();
     } else if (path === '/chat') {
-        const username = document.getElementById('username').value;
+        const urlParams = new URLSearchParams(window.location.search);
+        chatWith = urlParams.get('user');
         document.getElementById('chat-with').textContent = chatWith;
+        const username = getCookie('username');
         connectWebSocket(username);
     }
 };

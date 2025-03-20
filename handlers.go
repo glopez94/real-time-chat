@@ -34,6 +34,7 @@ func login(c *gin.Context) {
 	}
 	dbUser.Online = true
 	db.Save(&dbUser)
+	c.SetCookie("username", dbUser.Username, 3600, "/", "", false, true)
 	c.JSON(200, dbUser)
 }
 

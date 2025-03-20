@@ -17,14 +17,26 @@ func initDatabase() {
 	db.AutoMigrate(&User{})
 }
 
+func authMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username, err := c.Cookie("username")
+		if err != nil || username == "" {
+			c.Redirect(302, "/login")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
 func main() {
 	r := gin.Default()
 	initDatabase()
 
 	r.POST("/register", register)
 	r.POST("/login", login)
-	r.GET("/api/users", getUsers)
-	r.GET("/ws", handleConnections)
+	r.GET("/api/users", authMiddleware(), getUsers)
+	r.GET("/ws", authMiddleware(), handleConnections)
 
 	r.Static("/static", "./static")
 	r.LoadHTMLFiles("static/index.html", "static/register.html", "static/login.html", "static/users.html", "static/chat.html")
@@ -37,11 +49,16 @@ func main() {
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(200, "login.html", nil)
 	})
-	r.GET("/users_page", func(c *gin.Context) {
+	r.GET("/users_page", authMiddleware(), func(c *gin.Context) {
 		c.HTML(200, "users.html", nil)
 	})
-	r.GET("/chat", func(c *gin.Context) {
-		c.HTML(200, "chat.html", nil)
+	r.GET("/chat", authMiddleware(), func(c *gin.Context) {
+		chatWith := c.Query("user")
+		if chatWith == "" {
+			c.Redirect(302, "/users_page")
+			return
+		}
+		c.HTML(200, "chat.html", gin.H{"chatWith": chatWith})
 	})
 
 	go handleMessages()
